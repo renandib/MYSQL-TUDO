@@ -1,0 +1,124 @@
+## 11° VIDEO == > https://www.youtube.com/watch?v=E9g3KyWkjcg&list=PLOqx8yEV2-l0aNKvWbQn-VL_YDuRtW7E9&index=11
+
+# ======================= ++ ================ ++ ================= +++ PEQUENA EXPLICAÇÃO SOBRE "VIEW" = TABELAS VIRTUAIS =============================== ++======
+
+# PEQUENA EXPLICAÇÃO SOBRE "VIEWS" = VISUALIZAÇAO > SÃO CRIACAO DE TABELAS VIRTUAIS > SERVE PARA COMPARTILHAR COM TERCEIROS E TBM PERFOMACE  > geralmente usa com grandes pesquisas 
+# quando fazemos join > consome muito do banco > entao é melhor usar VIEWS > tabelas virtuais.. 
+
+# SINTAXE DA VIEW > CREATE VIEW nome da view AS nome q vc quer criar         / PARA APAGAR > DROP VIEW nome da view   / PARA VISUALIZAR > SELECT * FROM  NOME DA VIEW > ou vai na aba esquerda  em "views" q vai ta la
+
+# EX ABAIXO USANDO UM SELECT COMUM > POREM CRIANDO UMA "VIEW" PRA ESSE SELECT 
+
+# OBS TOP > QUALQUER MODIFICAÇÃO Q EU FAÇA NA MINHA QUERY > A VIEW ATUALIZA SOZINHA.. 
+
+CREATE VIEW vw_exemploSelect AS 
+SELECT * from tbl_clientes join tbl_enderecos on id_endereco = FK_id_endereco;
+
+SELECT * from  vw_exemploSelect;  # exibindo a VIEW Q EU CRIEI > isso é bom pra passar pra alguem > ex "BACKEND" AI ELES NAO PRECISA FICAR DIGITANDO QUERY > NEM CONSUMINDO O BANCO > pq ja ta pronto 
+
+INSERT INTO tbl_enderecos(cep,rua,numero,bairro,cidade,estado)
+	VALUES ("06855780","Rua do consolado",500,"Jardins","São Paulo","SP");
+
+INSERT INTO tbl_clientes(cpf,nome_cliente,telefone_cliente,celular_cliente,email_cliente,tipo_sanguineo,FK_id_endereco)
+VALUES("50387401425","Maria de fatima","11 4002-8922","11 999-7070","maria@gmail.com","O-",1);
+
+UPDATE tbl_enderecos SET cidade = "Campinas" WHERE id_endereco = 1;  # OBS TOP > TODA ALTERACAO Q EU FAÇO NA MINHA QUERY > A VIEW ATUALIZA SOZINHA..
+
+SELECT * from  vw_exemploSelect; # AQUI JA VAI TA ATUALIZADA  
+
+UPDATE vw_exemploSelect SET cidade = "Bauru" WHERE id_endereco = 1;  # OBS TOP 2 > TBM PODE FAZER A ALTERACAO NA PROPRIA VIEW ATUALIZA SOZINHA..
+
+# OBS TOP > NAO PODE FAZER ATUALIZACAO  EM VIEWS > QUE USAM FUNCOES DE AGREGAÇÃO > MIN / MAX / COUNT / AVG  >> ENTRETANDO É POSSIVEL FAZER AS MUDANCAS NA TABELA ORIGINAL E AI A VIEW ATUALIZA 
+
+
+
+
+# "TRIGGER" > SÃO QUERYS QUE SAO PROGRAMADAS PARA SEREM EXECUTADAS AUTOMATICAMENTE.. USANDO COMANDOS DE > INSERT / UPDATE / DELETE 
+# isso é bom > pq evita ficar digitando codigo toda hora > JA DEIXE TUDO PROGRAMADO > e tbm É BOM Q GERA UM HISTORICO 
+
+
+# =========++======== # DIA 10/08 > PROF FEZ A CORRECAO DESSA TABELA ACIMA E PASSOU ALGUNS EXERCICIOS QUE EU VOU COLOCAR ABAIXO : USANDO JOINS e tbm o DIAGRAMA PRA TER UMA IDEIA..
+# OBS > POR ENQUANTO AINDA NAO TEM DADOS NESSAS TABELAS > POREM O PROF QUER SÓ O RESULTADO DA PESQUISA..
+# OBS 2 > ALEM DESTE EXERCICIO TBM FOI PASSADO SOBRE > "VIEWS" > TBM É PRA USAR ELES NESTE EXERCICIO
+# 1) LISTE TODOS OS DADOS DOS CLIENTES E SEUS ENDEREÇOS 
+# 2) LISTE TODOS OS DADOS DOS ESPECIALISTAS , SEUS ENDEREÇOS E SUAS PROFISSÕES 
+# 3) CONSULTA DOS ATENDIMENTOS POR DATA DE AGENDAMENTO , DATA DE ATENDIMENTO , CLIENTE , STATUS , ESPECIALISTA
+# 4) CONSULTA DOS HISTORICOS  : POR CLIENTE , POR ESPECIALISTA , E POR PRONTUARIO 
+# 5) ESPECIALISTAS POR PROFISSAO 
+# 6) ATENDIMENTOS POR PROFISSAO 
+
+use etec;
+
+# SEGUE ABAIXO EXEMPLOS DE JOIN PARA TOMAR COMO BASE : 
+# SELECT tbl_filme.nome_filme, tbl_genero.genero from tbl_filme JOIN tbl_genero ON tbl_genero.Id_genero = tbl_filme.FK_id_genero; # > JEITO LERDO DE FAZER > MAS CERTO 
+# ex acima melhor > SELECT a.nome_filme, b.genero from tbl_filme a JOIN tbl_genero b ON b.Id_genero = a.FK_id_genero; 
+
+# REGRA > 1° OLHA O DIAGRAMA E SELECIONA O QUE QUER / 2° DA UM APELIDO PRA CADA TABELA / 3 ° FAZ O JOIN CHAMANDO AS TABELAS / 4° DPS DO ON > COLOCA AS CHAVES ESTRANGEIRAS Q FAZ LIGACAO
+
+# RESPONDENDOO 
+
+
+use etec2;    
+# 1) LISTE TODOS OS DADOS DOS CLIENTES E SEUS ENDEREÇOS  > TRAZER TODOS OS DADOS DAS 2 DUAS TABELAS 
+select * from tbl_clientes; # > aqui vai mostrar somente os dados do cliente > menos endereços 
+
+CREATE VIEW vw_exerc1 AS # > CRIANDO UMA VIEW > PRA FICAR MAIS RAPIDO A PESQUISA 
+select * from tbl_clientes a 
+JOIN tbl_enderecos b ON b.id_endereco = a.FK_id_endereco; # > AQUI VAI MOSTRAR OS DADOS DAS DUAS TABELAS > 
+
+SELECT * FROM vw_exerc1;  # > CONFERINDO PRA VER SE DEU TUDO CERTO 
+
+# 2) LISTE TODOS OS DADOS DOS ESPECIALISTAS , SEUS ENDEREÇOS E SUAS PROFISSÕES 
+select * from tbl_especialistas;
+SELECT * FROM tbl_profissoes;
+
+CREATE VIEW vw_exerc2 AS
+SELECT * from tbl_especialistas a
+JOIN tbl_enderecos b ON b.id_endereco = a.FK_id_enderecos 
+JOIN tbl_profissoes c ON  c.id_profissao = a.FK_id_profissao;
+
+SELECT * FROM vw_exerc2;
+
+# 3) CONSULTA DOS ATENDIMENTOS POR DATA DE AGENDAMENTO , DATA DE ATENDIMENTO , CLIENTE , STATUS , ESPECIALISTA (esse é um pouco dificil ) 
+
+CREATE VIEW vw_exerc3 AS
+SELECT a.data_agendada , a.data_atendimento , a.status_atendimento , b.nome_especialista , d.nome_cliente , d.cpf FROM tbl_atendimentos a
+JOIN tbl_especialistas b ON  b.id_especialista = a.FK_id_especialista
+JOIN tbl_prontuarios c ON c.id_prontuario = a.FK_id_prontuario 
+JOIN tbl_clientes d ON d.id_cliente = c.FK_id_cliente;
+
+SELECT * from vw_exerc3;
+
+# 4) CONSULTA DOS HISTORICOS  : POR CLIENTE , POR ESPECIALISTA , E POR PRONTUARIO 
+
+CREATE VIEW vw_exerc4 AS  # > 1° criando uma view 
+# 2° AGORA EU VOU OLHAR NO DIAGRAMA > QUAIS AS TABELAS Q SAO MAIS PROXIMAS > VOU COMEÇAR POR ELAS 
+# 3° JA AS TABELAS Q SAO MAIS LONGES > EU VOU CHEGANDO NELAS ATRAVES DAS OUTRAS TABELAS MAIS PROXIMAS 
+# 4° EX > DIGAMOS Q TEM Q PRECISA PEGAR DADOS DE 3 TABELAS "A"/"B"/"C"  
+# 5° a TABELA "A" e "B" > ESTA UMA DO LADO DA OUTRA > POREM A TABELA "C" ESTA DUAS TABELAS PRA FRENTE
+# 6° ENTÃO EU TENHO Q PEGAR OUTRA TABELA Q TA PERTO DA TABELA > "A" OU "B" > E PROXIMA DA TABELA > "C" > 
+# 7° ENTAO > EU TENHO Q FAZER LIGACAO AGORA COM A TABELA > "C" E "D" > DPS Q EU FIZER O "JOIN" + O "ON" > DESSAS DUAS TBL > "C" e "D"
+# 8° > AI SIM EU FAÇO A CHAMADA NO SELECT DO CONTEUDO Q EU QUERO DA TABELA > "C"
+SELECT a.data_atendimento , b.nome_cliente , b.cpf , c.nome_especialista , d.data_prontuario FROM tbl_historicos_prontuarios a
+JOIN tbl_atendimentos e ON e.id_atendimento = a.FK_id_atendimento 
+JOIN tbl_prontuarios d ON d.id_prontuario = e.FK_id_prontuario 
+JOIN tbl_clientes b ON b.id_cliente = d.FK_id_cliente 
+JOIN tbl_especialistas c ON c.id_especialista = e.FK_id_especialista;
+
+SELECT * FROM vw_exerc4;
+
+# 5) ESPECIALISTAS POR PROFISSAO
+
+CREATE VIEW vw_exerc5 AS
+SELECT a.nome_especialista , a.registro , b.nome_profissao FROM tbl_especialistas a
+JOIN tbl_profissoes b ON b.id_profissao = a.FK_id_profissao ;
+
+SELECT * FROM vw_exerc5;
+
+# 6) ATENDIMENTOS POR PROFISSAO 
+CREATE VIEW vw_exerc6 AS
+SELECT a.data_agendada , a.data_atendimento , a.valor_atendimento , a.status_atendimento , b.nome_profissao FROM tbl_atendimentos a 
+JOIN tbl_especialistas c ON c.id_especialista = a.FK_id_especialista 
+JOIN tbl_profissoes b ON b.id_profissao = c.FK_id_profissao; 
+
+SELECT * FROM vw_exerc5; 

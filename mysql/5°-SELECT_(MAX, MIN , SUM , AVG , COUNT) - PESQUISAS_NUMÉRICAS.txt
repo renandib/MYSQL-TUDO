@@ -1,0 +1,43 @@
+
+# 5° VIDEO == > https://www.youtube.com/watch?v=o40eD5bxfiY&list=PLOqx8yEV2-l0aNKvWbQn-VL_YDuRtW7E9&index=5
+
+# OBS > ESSAS FUNCOES PODEM SER USADAS ALEM DE INT > PODE USAR EM VARCHAR E DATE TBM > EX > 1° letra do alfabeto > Min(alfabeto) 
+# FUNÇÕES TOP DE PESQUISA >  MAX / MIN / SUM / AVG / COUNT 
+
+# MAX = PEGA O VALOR MAXIMO   //  MIN = PEGA O MENOR 
+
+# SUM = SOMA DOS VALORES  // AVG = MÉDIA 
+
+# COUNT = CONTAGEM 
+
+# SELECIONE OS FILMES DE MAIOR DURACAO E MENOR DURACAO
+select * from tbl_filme;
+
+# OPERAÇÕES COM NUMEROS == OPERAÇÕES MATEMATICAS.. PESQUISA EM NUMEROS
+
+SELECT MAX(duracao),nome_filme FROM tbl_filme; # CERTO MAIOR VALOR
+
+SELECT MIN(duracao),nome_filme FROM tbl_filme; # MENOR VALOR
+
+SELECT SUM(duracao) AS soma_total FROM tbl_filme; # SOMA DE TODOS OS VALORES
+
+SELECT AVG(duracao) AS media_filmes FROM tbl_filme; # média dos valores
+
+SELECT COUNT(duracao) AS contagem FROM tbl_filme; # QUANTOS VALORES TEM (CONTAGEM)
+
+
+#create procedure sp_maior_menor (
+# FALTA TERMINAR
+#)
+
+
+
+# obs > SELECT MAX(duracao) AND MIN(duracao),nome_filme FROM tbl_filme; ERRADO > n pode USAR AND E OUTROS COMPLEMENTOS NAS FUNCOES 
+
+# SELECIONE A MENOR DURAÇÃO , A MAIOR , A SOMA DAS DURAÇÕES , A MÉDIA E TAMBEM QUANTAS TEM 
+
+SELECT min(duracao), max(duracao) , sum(duracao) , avg(duracao) ,count(duracao) FROM tbl_filme;
+
+SELECT MAX(dt_nascimento) FROM tbl_ator;  # > traz a data mais recente 
+
+SELECT max(nome_ator) FROM tbl_ator;  # > traz o ultimo ator.. 

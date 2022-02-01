@@ -1,0 +1,42 @@
+## 6° VIDEO == > https://www.youtube.com/watch?v=UFye24q83f8&list=PLOqx8yEV2-l0aNKvWbQn-VL_YDuRtW7E9&index=6
+
+# AULA 12 > COMANDOS > "LIMIT" /  "IN" / "DISTINCT" / "HAVING" 
+
+# APRENDENDO A USAR O COMANDO > "LIMIT" > EXIBIR VALORES DE TAL VALOR AO LIMITE DE VALOR TAL.. EX > SELECT * FROM tbl_ator LIMIT 0,10; > vai exibir até 10 atores.
+# QUANDO TEM MUITOS RESULTADOS > PARA NAO EXIBIR TODOS E CONSUMIR MEMORIA > PODE USAR O "LIMIT" TBM > OBS O "LIMIT" > SEMPRE VAI NO FINAL > E PREC DE UM INICIO E UM FINAL COMO PARAMETRO
+# PODE USAR POR EX > NA PAG 1 EX NO MAXIMO 3 ATORES > NA PAG 2 EXIB > 5 ATORES..E AI ETC > ESSE É O USO DO "LIMIT"
+
+# EX DO LIMIT 
+SELECT * FROM tbl_filme;
+
+select * from tbl_filme limit 2,5;  # > aqui vai exibir a partir do 3° filme até chegar a 5 filmes .. 
+
+# TEMOS O COMANDO "IN" ELE MEIO Q É UMA ALTERNATIVA DE USAR O "OR" AO INVÉS DE USAR UM MONTE DE OR > USA O "IN" > EX > SELECT* FROM tbl_filme WHERE fk_id_genero IN (1,2,3); > AQUI ELE JA VAI DIRETO NELES > SE FOSSE COM "OR" > SELECT * FROM tbl_filme WHERE fk_id_genero OR = 1 , fk_id_genero OR = 2 , fk_id_genero OR = 3  
+
+# EX DO "IN" # quero pegar só os generos de numero impar > se fosse usando o OR > teria q fazer um monte de or > mas com O "IN" É MAIS FACIL
+select * FROM tbl_filme WHERE fk_id_genero in(1,3,5,7);
+
+# "DISTINCT" RETORNA OS VALORES SEM REPETIÇÃO PARECIDO COM GROUP BY > POREM NAO UTILIZADO EM FUNCOES DE AGREGAÇÃO > POR SÓ RETORNAR VALORES DIFERENTES.. 
+# SELECT DISTINCT (nacionalidade) from tbl_diretor; > OBS > O DISTINCT > SEMPRE VAI DPS DO SELECT .. ele ne aceita outras coisas.. só isso > GROUP BY > ELE LISTA ELEMENTOS POR GRUPOS 
+# EX DO DISTINCT 
+
+
+select nacionalidade from tbl_diretor; # > AQUI VAI TRAZER 4 IGUAIS > BRASIL 2 X E ESTADOS UNIDOS 2X 
+select nacionalidade, count(*) from tbl_diretor group by nacionalidade; # > aqui ele vai trazer todos e a contagem tbm > porem os repetidos ele só deixa um.. > ALEM DE FAZER ASSIM TBM POSSO USAR O DISTINCT É A MESMA COISA
+select distinct (nacionalidade) , count(*) from tbl_diretor group by nacionalidade; # AQUI VAI DAR O MESMO RESULTADO DO GROUP BY .. OBS > O GROUP BY > ELE SERVE COMO CONTAGEM >PQ ELE AGRUPA POR TEMA > JA O DISTINCT > NAO DA PRA USAR COMO CONTAGEM  > PQ ELE SÓ MOSTRA OS DIFERENTES
+
+  
+
+# TEMOS TBM O COMANDO "HAVING" esse comando parece com o "WHERE" > ELA ESPECIFICA ALGUMAS CONDIÇÕES.. > a diferença É Q O HAVING PODE SER USADO APOS UM GROUP BY > JA UM WHERE NAO.. 
+#ex > select * from tbl_diretor HAVING nacionalidade = "canada"; // obs q aqui tbm poderia ser um WHERE AONDE TEM O HAVING
+# ex 2 > selecionar os paises com mais de 2 diretores cadastrados..> DICA > SEMPRE QUANDO FOR QUANTIFICAR ALGO > DEVEMOS USAR O COUNT + O GROUP BY 
+
+SELECT count(*) AS total_diretor,nacionalidade FROM tbl_diretor 
+GROUP BY nacionalidade HAVING total_diretor>=2 ORDER BY nacionalidade ASC; # A DIFERENÇA AQUI É Q O HAVING É UTILIZADO DPS DO GROUP BY > JA O WHERE N POODERIA..alter
+
+# ENCONTRE O TOTAL DE FILMES POR GENERO LANÇADOS ENTRE 2000 E 2020 > desse total ache FILMES Q TENHAM MAIS DE 4X O GENERO IGUAL
+SELECT COUNT(*) as total_filmes , FK_id_genero from tbl_filme 
+WHERE ano_lancamento between '2000' AND '2020'
+GROUP BY FK_id_genero HAVING total_filmes > 4 ORDER BY FK_id_genero DESC ;
+
+# OBS TOP => O "GROUP BY" (SELECIONA ITENS EM COMUM) X  "ORDER BY" (MOSTRA OS GRUPOS DE FORMA CRESCENTE OU DESCRECENTE)

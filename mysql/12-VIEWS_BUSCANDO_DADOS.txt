@@ -1,0 +1,72 @@
+# VIDEO 12° ==> https://www.youtube.com/watch?v=8nrBvce-Z2I&list=PLOqx8yEV2-l0aNKvWbQn-VL_YDuRtW7E9&index=12
+
+# REGRA > 1° OLHA O DIAGRAMA E SELECIONA O QUE QUER / 2° DA UM APELIDO PRA CADA TABELA / 3 ° FAZ O JOIN CHAMANDO AS TABELAS / 4° DPS DO ON > COLOCA AS CHAVES ESTRANGEIRAS Q FAZ LIGACAO
+use etec2;
+# RESPONDENDOO 
+    
+# 1) LISTE TODOS OS DADOS DOS CLIENTES E SEUS ENDEREÇOS  > TRAZER TODOS OS DADOS DAS 2 DUAS TABELAS 
+select * from tbl_clientes; # > aqui vai mostrar somente os dados do cliente > menos endereços 
+
+CREATE VIEW vw_exerc1 AS # > CRIANDO UMA VIEW > PRA FICAR MAIS RAPIDO A PESQUISA 
+select * from tbl_clientes a 
+JOIN tbl_enderecos b ON b.id_endereco = a.FK_id_endereco; # > AQUI VAI MOSTRAR OS DADOS DAS DUAS TABELAS > 
+
+SELECT * FROM vw_exerc1;  # > CONFERINDO PRA VER SE DEU TUDO CERTO 
+
+# 2) LISTE TODOS OS DADOS DOS ESPECIALISTAS , SEUS ENDEREÇOS E SUAS PROFISSÕES 
+select * from tbl_especialistas;
+SELECT * FROM tbl_profissoes;
+
+CREATE VIEW vw_exerc2 AS
+SELECT * from tbl_especialistas a
+JOIN tbl_enderecos b ON b.id_endereco = a.FK_id_enderecos 
+JOIN tbl_profissoes c ON  c.id_profissao = a.FK_id_profissao;
+
+SELECT * FROM vw_exerc2;
+
+# 3) CONSULTA DOS ATENDIMENTOS POR DATA DE AGENDAMENTO , DATA DE ATENDIMENTO , CLIENTE , STATUS , ESPECIALISTA (esse é um pouco dificil ) 
+
+CREATE VIEW vw_exerc3 AS
+SELECT a.data_agendada , a.data_atendimento , a.status_atendimento , b.nome_especialista , d.nome_cliente , d.cpf FROM tbl_atendimentos a
+JOIN tbl_especialistas b ON  b.id_especialista = a.FK_id_especialista
+JOIN tbl_prontuarios c ON c.id_prontuario = a.FK_id_prontuario 
+JOIN tbl_clientes d ON d.id_cliente = c.FK_id_cliente;
+
+SELECT * from vw_exerc3;
+
+# 4) CONSULTA DOS HISTORICOS  : POR CLIENTE , POR ESPECIALISTA , E POR PRONTUARIO 
+
+CREATE VIEW vw_exerc4 AS  # > 1° criando uma view 
+# 2° AGORA EU VOU OLHAR NO DIAGRAMA > QUAIS AS TABELAS Q SAO MAIS PROXIMAS > VOU COMEÇAR POR ELAS 
+# 3° JA AS TABELAS Q SAO MAIS LONGES > EU VOU CHEGANDO NELAS ATRAVES DAS OUTRAS TABELAS MAIS PROXIMAS 
+# 4° EX > DIGAMOS Q TEM Q PRECISA PEGAR DADOS DE 3 TABELAS "A"/"B"/"C"  
+# 5° a TABELA "A" e "B" > ESTA UMA DO LADO DA OUTRA > POREM A TABELA "C" ESTA DUAS TABELAS PRA FRENTE
+# 6° ENTÃO EU TENHO Q PEGAR OUTRA TABELA Q TA PERTO DA TABELA > "A" OU "B" > E PROXIMA DA TABELA > "C" > 
+# 7° ENTAO > EU TENHO Q FAZER LIGACAO AGORA COM A TABELA > "C" E "D" > DPS Q EU FIZER O "JOIN" + O "ON" > DESSAS DUAS TBL > "C" e "D"
+# 8° > AI SIM EU FAÇO A CHAMADA NO SELECT DO CONTEUDO Q EU QUERO DA TABELA > "C"
+
+
+SELECT a.data_atendimento , b.nome_cliente , b.cpf , c.nome_especialista , d.data_prontuario FROM tbl_historicos_prontuarios a
+JOIN tbl_atendimentos e ON e.id_atendimento = a.FK_id_atendimento 
+JOIN tbl_prontuarios d ON d.id_prontuario = e.FK_id_prontuario 
+JOIN tbl_clientes b ON b.id_cliente = d.FK_id_cliente 
+JOIN tbl_especialistas c ON c.id_especialista = e.FK_id_especialista;
+
+SELECT * FROM vw_exerc4;
+
+# 5) ESPECIALISTAS POR PROFISSAO
+
+CREATE VIEW vw_exerc5 AS
+SELECT a.nome_especialista , a.registro , b.nome_profissao FROM tbl_especialistas a
+JOIN tbl_profissoes b ON b.id_profissao = a.FK_id_profissao ;
+
+SELECT * FROM vw_exerc5;
+
+# 6) ATENDIMENTOS POR PROFISSAO 
+CREATE VIEW vw_exerc6 AS
+SELECT a.data_agendada , a.data_atendimento , a.valor_atendimento , a.status_atendimento , b.nome_profissao FROM tbl_atendimentos a 
+JOIN tbl_especialistas c ON c.id_especialista = a.FK_id_especialista 
+JOIN tbl_profissoes b ON b.id_profissao = c.FK_id_profissao; 
+
+SELECT * FROM vw_exerc5; 
+# terminei e entreguei dia  > 23/08 > era pra entregar dia 24/08 > LEMBRANDO Q NA PROXIMA AULA ELE VAI FALAR SOBRE TRIGGERS E TBM VAI MANDAR PREENCHER ESSAS TABELAS ACIMA

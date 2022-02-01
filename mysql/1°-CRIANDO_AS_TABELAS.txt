@@ -1,0 +1,78 @@
+# 1° VIDEO ==> https://www.youtube.com/watch?v=OW0kLrZbAbo&list=PLOqx8yEV2-l0aNKvWbQn-VL_YDuRtW7E9&index=1
+
+CREATE database etec2; -- CRIANDO BANCO DE DADOS > LEMBRANDO Q SQL N É SENSITVE >PODE SER MAISCULO OU MINISCULO 
+# DROP database etec2; CASO QUEIRA EXCLUIR
+
+-- 2° COLOCAR ELE PARA FUNCIONAR 
+USE etec2;    # LEMBRANDO Q ESSE BANCO ERA PRA SE CHAMAR > " CINEMA "> MAS EU QUIS COLOCAR ETEC
+
+
+CREATE TABLE IF NOT EXISTS tbl_ator(   -- criando a tabela 
+	id_ator int primary key auto_increment,  -- criando a chave primaria identificadora > esse auto_incremente o banco cria um ID AUTOMATICO => VALE A PENA FAZER 
+    nome_ator varchar(45) not null , -- PODE CONTER APENAS 45 CARACTERES NA STRING E NÃO PODE SER NULO > TENQ SER PREENCHIDO 
+    sexo varchar(1) not null,
+    dt_nascimento date not null); 
+
+    
+CREATE TABLE IF NOT EXISTS tbl_diretor(
+	id_diretor int primary key auto_increment,
+    nome_diretor varchar(45) not null,
+    nacionalidade varchar(10) not null,
+    dt_nascimento date not null);
+
+    
+CREATE TABLE IF NOT EXISTS tbl_genero(
+	id_genero int primary key auto_increment,
+    genero varchar(45) not null);
+ 
+ # dica para criar uma chave estrangeira > 1° você tenque criar O DADO DA COLUNA A COM O MESMO TIPO DO DADO DA COLUNA B > ex se o dado da coluna é INT .. o outro dado da coluna B tenq ser int tbm
+ # 2° passo > tenq criar uma constraint > tipo um identificador da chave estrangeira.. 
+ # 3° passo > constraint NOME Q VC QUER foreign key(campo q vc quer) refences TABELA Q VC VAI LIGAR(CAMPO Q VC VAI LIGAR) 
+
+CREATE TABLE IF NOT EXISTS tbl_filme(
+	id_filme int primary key auto_increment,
+    nome_filme_pt varchar(45) not null,
+    nome_filme_en varchar(45),
+    ano_lancamento int(4) not null,
+    duracao int(3) not null,
+    FK_id_genero int not null,
+    FK_id_diretor int not null,
+    constraint FK_id_genero foreign key(FK_id_genero) references tbl_genero(id_genero),
+    constraint FK_id_diretor foreign key(FK_id_diretor) references tbl_diretor(id_diretor));
+
+SELECT * FROM tbl_filme;
+desc tbl_genero;
+
+-- fazendo chave estrangeira sem constraint > n é muito bom.. mas vou fazer para mostrar 
+use etec;
+
+
+CREATE TABLE IF NOT EXISTS tbl_filme_has_tbl_ator(
+		FK_id_filme int not null,
+        FK_id_ator int not null,
+        foreign key(FK_id_filme) references tbl_filme(id_filme),
+        foreign key(FK_id_ator) references tbl_ator(id_ator)
+        );
+        
+CREATE TABLE IF NOT EXISTS tbl_horario(
+	id_horario int(11) primary key auto_increment,
+    horario time not null);
+    
+DESC tbl_horario;    
+CREATE TABLE tbl_sala(
+	id_sala int(11) primary key auto_increment,
+    capacidade int(11) not null);
+
+DESC tbl_sala;
+-- ESSA ULTIMA TABELA TA OSSO PRA CRIAR.. TA DANDO ERRO > VER COM O PROF
+CREATE TABLE IF NOT EXISTS tbl_exibicao(
+	id_exibicao int(11) primary key auto_increment,
+    data_exibicao date,
+    FK_id_sala int(11),
+    FK_id_horario int(11),
+    FK_id_filme int(11),
+    constraint FK_id_sala foreign key(FK_id_sala) references tbl_sala(id_sala),
+    constraint FK_id_horario foreign key(FK_id_horario) references tbl_horario(id_horario),
+    constraint FK_id_filme foreign key(FK_id_filme) references tbl_filme(id_filme)
+    );
+desc tbl_exibicao;    

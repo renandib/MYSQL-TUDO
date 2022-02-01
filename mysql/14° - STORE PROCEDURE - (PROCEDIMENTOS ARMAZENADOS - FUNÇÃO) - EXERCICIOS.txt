@@ -1,0 +1,493 @@
+# 14° VIDEO ==> https://www.youtube.com/watch?v=hOxyB9_v0l8&list=PLOqx8yEV2-l0aNKvWbQn-VL_YDuRtW7E9&index=14
+
+# PRIMEIRO EXEMPLO DE STORY PROCEDURE ==> procedimentos armazenados ==> FUNÇÃO 
+
+USE etec2;  # criando tabelas de exemplo 
+
+# CRIANDO 1° TABELA EX , PARA FAZER A 1° STORE PROCEDURE
+CREATE TABLE tbl_logins(
+	id_login int primary key auto_increment,
+    usuario varchar(45) not null,
+    senha varchar(45) not null
+    );
+    
+# CRIANDO A 2° TABELA EX , PARA FAZER A 2° STORE PROCEDURE     
+CREATE TABLE tbl_cliente(
+	id_cliente int primary key auto_increment,
+    nome_cliente varchar(45) not null
+);
+
+select * from tbl_cliente;
+CREATE TABLE tbl_dados_bancarios(
+	id_dados int primary key auto_increment,
+    agencia int not null,
+    conta int not null
+);
+
+# CRIANDO 1° EX DE ( STORE PROCEDURE )
+
+DELIMITER $$ 
+CREATE PROCEDURE sp_seleciona_usuarios()
+BEGIN 
+	SELECT * FROM tbl_logins;
+
+END $$
+
+DELIMITER ;
+
+# APOS CRIAR A FUNCAO DE > (STORE PROCEDURE) ACIMA  > EU PRECISO FAZER A CHAMADA DELA USANDO > ("CALL") NOME DA PROCEDURE
+
+CALL sp_seleciona_usuarios;  # vai executar a PROCEDURE Q EU CRIEI ACIMA.. 
+
+# CRIANDO EX 2° PROCEDURE COM PARAMETROS 
+
+DELIMITER $$
+	CREATE PROCEDURE sp_registra_usuario(p_usuario varchar(45), p_senha varchar(45))  # CRIANDO PARAMETROS > lembrando q tenq colocar o mesmo TIPO q tinha os campos q eu quero..
+    BEGIN 
+		INSERT INTO tbl_logins(usuario,senha)	# FAZ A INSERÇÃO NA ONDE QUER..
+			VALUES(p_usuario, p_senha);		# USA OS PARAMETROS Q EU CRIEI ACIMA 
+											
+END $$
+
+DELIMITER ;  
+
+# FAZENDO A CHAMADA DA FUNÇÃO ACIMA 
+
+CALL sp_registra_usuario("alfredo" , "1234");  # CHAMANDO A FUNCAO > E JA MANDANDO OS PARAMETROS.. 
+
+# AGORA FAZEMOS A CHAMADA DA 1° PROCEDURE Q EU CRIEI > PRA VERIFICAR O SELECT > SE FOI INSERIDO ALGUMA COISA DA 2°FUNCAO 
+
+CALL sp_seleciona_usuarios;  # pronto consigo ver.. 
+
+## >>>> TOPP  > CRIPTOGRAFANDO NO MYSQL 
+
+# AGORA VAMOS CRIAR UMA "PROCEDURE" > QUE ( CRIPTOGRAFA ) NOSSA SENHA ***** > "USANDO O PADRAO > ( MD5 (string) )
+
+# OBS > ESSE (MD5) É ANTIGO > EXISTE ALGUNS PROGRAMAS Q JA CONSEGUEM FAZER A LEITURA DESSA CRIPTOGRAFIA.. 
+
+DELIMITER $$
+	CREATE PROCEDURE sp_registra_cripto(p_usuario varchar(45), p_senha varchar(45))  # CRIANDO PARAMETROS
+    BEGIN 
+		INSERT INTO tbl_logins(usuario,senha)	# FAZ A INSERÇÃO NA ONDE QUER..
+			VALUES(p_usuario,MD5( p_senha));		# REPARE Q AQUI EU TO USANDO O > (MD5) PRA CRIPTOGRAFAR
+											
+END $$
+
+DELIMITER ;  
+# AGORA FAZER A CHAMADA PRA VER SE VAI DAR CERTO 
+
+CALL sp_registra_cripto("usuario2","criptografando");
+
+# VERIFICANDO SE DEU CERTO 
+
+CALL sp_seleciona_usuarios;  
+
+# OBS > CASO VC FAÇA UM SELECT EM UMA SENHA CRIPTOGRAFADA > VC PRECISA FAZER ASSIM ABAIXO 
+
+SELECT * FROM tbl_logins WHERE senha = md5("criptografando");  # ai sim ele acha.. se n tiver  >MD5 ele n reconhece.. 
+
+# INSERINDO DADOS EM 2 TABELAS AO MESMO TEMPO > POR (PROCEDURES ) 
+
+# > CADASTRANDO CLIENTE + AGENCIA E CONTA > DE UMA VEZ SÓ > AO INVES DE INSERIR UM POR UM .. 
+
+
+DELIMITER $$
+	CREATE PROCEDURE sp_insere_cliente_conta(p_nome_cliente varchar(45), p_agencia int , p_conta int)  # CRIANDO PARAMETROS
+    BEGIN 
+		INSERT INTO tbl_cliente(nome_cliente)	# FAZ A INSERÇÃO NA ONDE QUER..
+			VALUES(p_nome_cliente);		# USA OS PARAMETROS Q EU CRIEI ACIMA
+		
+        # FAZENDO 2° ACAO DE INSERT
+        INSERT INTO tbl_dados_bancarios(agencia , conta)
+			VALUES(p_agencia , p_conta);
+END $$
+
+DELIMITER ;
+
+# AGORA VAMOS FAZER O TESTE PRA VER SE FOI 
+
+CALL sp_insere_cliente_conta("evelyn", 0010 , 015228);
+
+# VISUALIZANDO SE DEU CERTO  > PRA FICAR MELHOR > PODERIA USAR UM JOIN.. 
+
+SELECT * FROM tbl_dados_bancarios;
+SELECT * FROM tbl_cliente;
+
+
+
+# ====>>>>> RENAN >> CRIANDO PROCEDURE PRA TBL CLIENTES / TBL ESPECIALISTAS / TBL PROFISSOES  DE > INSERT / UPDATE / DELETE / GET POR ID / GET GERAL 
+# OBS > FALTA DPS FAZER > (DELETE E OS 2 GET DE PROCURA) > DA TBL_USUARIOS
+
+use etec;
+
+desc tbl_clientes;
+select * from tbl_clientes;
+
+# OBS TOP > EU TENHO Q VERIFICAR > SE O CLIENTE ESTA COM (STATUS DELETADO = 0 ) > AI SIM EU POSSO > ATUALIZAR OU DELETAR )
+drop procedure sp_registra_cliente;
+
+#		===> CRIANDO INSERÇÃO TBL_CLIENTES 
+
+DELIMITER $$
+CREATE PROCEDURE sp_registra_cliente(
+	cep int(10), rua varchar(45), numero varchar(10),			# TBL ENDERECO
+	bairro varchar(45),	cidade varchar(45), estado varchar(2),
+
+	cpf varchar (11),nome_cliente varchar (45), telefone_cliente varchar (45), 
+	celular_cliente varchar (45), email_cliente varchar (45), 						# TBL CLIENTES
+	tipo_sanguineo enum ('A+','A-','B+','B-','O+','O-','AB+','AB-'))
+begin
+		
+            insert into tbl_enderecos (cep, rua, numero, bairro, cidade, estado)
+			values (cep,rua, numero, bairro, cidade, estado);
+	
+			insert into tbl_clientes(cpf,nome_cliente,telefone_cliente,celular_cliente,email_cliente,tipo_sanguineo,FK_id_endereco)
+			values (cpf,nome_cliente,telefone_cliente,celular_cliente,email_cliente,tipo_sanguineo, 
+			(select max(id_endereco) from tbl_enderecos));
+            
+		
+ end $$
+ DELIMITER ;
+
+## TESTANDO 
+call sp_registra_cliente (04342039,"rua celorico","59","jd Valquiria","São Paulo","SP","42781444820","Renan da Silva","5845-2542","94324-4324","silvaramos.renan@gmail.com","A+");
+
+call sp_registra_cliente(0123456, "Espe", 123, "Emb", "sao paulo", "SP",
+123654, "joao", "14253678", 974856321, "joao@hotmail.com",
+"A+");
+
+SELECT * FROM tbl_clientes; 
+
+#======>>>>> UPDATE TBL CLIENTES 
+
+## OBS TOP > O CERTO É EU CRIAR UMA TRIGGER > EM TODOS OS MEUS UPDATES ( PRA GUARDAR OS VALORES ANTIGOS EM UMA TABELA DE LOG) > MAS POR ENQUANTO N VOU FAZER ISSO. 
+drop procedure sp_update_cliente;
+
+DELIMITER $$ 
+
+CREATE PROCEDURE sp_update_cliente(id int(11),cpf varchar (11), nome_cliente varchar (45), telefone_cliente varchar (45), 
+	celular_cliente varchar (45), email_cliente varchar (45), 
+	tipo_sanguineo enum ('A+','A-','B+','B-','O+','O-','AB+','AB-')
+)
+    
+begin
+
+		if id <= (select max(id_cliente) from tbl_clientes)  # NÃO PERMITE QUE PASSE UM ID QUE NÃO EXISTE
+			and id > 0     # SÓ ACEITA ID MAIOR Q 0
+			and (select id_cliente from tbl_clientes where id_cliente = id and cliente_deletado = 0)  # SÓ PODE ATUALIZAR OS CLIENTES Q NAO ESTIVEREM DELETADOS > (SE CASO QUISER ATUALIZAR CLIENTE DELETADO É EM UM PROCEDURE A PARTE)
+			# and id = (select id_cliente from tbl_clientes where id_cliente = id and cliente_deletado = 0) > assim tbm funcionou 
+		then  # VERIFICANDO SE O ID É VALIDO.(obs> se eu n faço isso > ele aceita qualquer numero)
+			update tbl_clientes set 
+			cpf = cpf,
+			nome_cliente = nome_cliente,
+			telefone_cliente = telefone_cliente,
+			celular_cliente = celular_cliente,
+			email_cliente = email_cliente,
+			tipo_sanguineo = tipo_sanguineo
+			where id_cliente = id;
+        
+			select * from tbl_clientes where id_cliente = id; 
+		end if;
+ end $$
+ DELIMITER ;
+# TESTANDO 
+select * from tbl_clientes;
+
+call sp_update_cliente(0,"48294293212", "teste6", "5524-2421", "9121-3421", "testecliente@gmail.com", "A+"); 
+SELECT * FROM tbl_clientes;
+
+##===== >>>> CRIANDO PROCEDURE DE EXCLUSÃO TBL_CLIENTES > NÃO PODE DELETAR DO BANCO > PQ PRECISA FAZER CONSULTAS FUTURAS 
+
+drop procedure sp_exclusao_cliente;
+DELIMITER $$ 
+
+CREATE PROCEDURE sp_exclusao_cliente(id int(11))
+
+begin
+		
+        if id <= (select max(id_cliente) from tbl_clientes) and id > 0 
+			and (select id_cliente from tbl_clientes where id_cliente = id and cliente_deletado = 0)then  # VERIFICANDO SE O ID É VALIDO.(obs> se eu n faço isso > ele aceita qualquer numero)
+			
+            update tbl_clientes set 
+			cliente_deletado = 1
+			where id_cliente = id;
+        
+			select * from tbl_clientes where id_cliente = id;
+        end if;
+ end $$
+ DELIMITER ;
+
+# TESTAND0
+select * from tbl_clientes;
+call sp_exclusao_cliente (1);
+select * from tbl_clientes;
+# DICA > LA NO VSCODE EU FAÇO A VERIFICAÇÃO > SE CASO RETORNAR VAZIA ESSA QUERY > EU MANDO A MENSAGEM Q O ID ESTA ERRADO OU ENTAO O CLIENTE JA ESTA (DELETADO)
+
+##=======>> GET DE CLIENTES  >  ENCONTRANDO CLIENTE POR ID 
+drop procedure sp_encontra_cliente;
+DELIMITER $$ 
+
+CREATE PROCEDURE sp_encontra_cliente(id int(11))
+
+begin
+		if id <= (select max(id_cliente) from tbl_clientes) and id > 0 then  # VERIFICANDO SE O ID É VALIDO.(obs> se eu n faço isso > ele aceita qualquer numero)
+        select * from tbl_clientes where id_cliente = id;
+        end if;
+ end $$
+ DELIMITER ;
+
+# TESTANDO 
+select * from tbl_clientes;
+call sp_encontra_cliente(0);
+
+##=========== >>  GET DE CLIENTES 2 > ENCONTRANDO TODOS OS CLIENTES > DIGITANDO ID = 0
+DELIMITER $$ 
+
+CREATE PROCEDURE sp_todos_cliente(id int(11))
+
+begin
+		if id = 0 then
+        select * from tbl_clientes;
+        end if;
+ end $$
+ DELIMITER ;
+ 
+ # testando 
+ call sp_todos_cliente(0);
+
+
+#====>>> CRIANDO PROCEDURE PRA TBL _ ESPECLISTAS  > INSERT / UPDATE / DELETE / GET POR ID / E GET ID = 0 
+
+#===>>> INSERÇÃO TBL_ESPECIALISTAS 
+DELIMITER $$
+create procedure sp_registra_especialistas(
+	cep int(10), rua varchar(45), numero varchar(10),
+	bairro varchar(45),	cidade varchar(45), estado varchar(2),
+    
+    registro varchar(45), nome_especialista varchar(45), telefone_especialista varchar(45),
+    celular_especialista varchar(45), email_especialista varchar(45))
+begin
+	insert into tbl_enderecos (cep, rua, numero, bairro, cidade, estado)
+		values (cep,rua, numero, bairro, cidade, estado);
+	insert into tbl_especialistas (registro, nome_especialista, 
+									telefone_especialista, celular_especialista, email_especialista, 
+                                    FK_id_enderecos)
+		values(registro, nome_especialista, telefone_especialista, celular_especialista, 
+                email_especialista, (select max(id_endereco) from tbl_enderecos ));
+end$$
+DELIMITER ;
+
+# OBS IMPORTANTE > JA FIZ AS VALIDAÇÕES NO VSCODE > NA CONTROLLER .. aqui só to mandando executar a inserção do banco mesmo.. 
+# TESTANDO
+call sp_registra_especialistas ("0587252","rua abacaxi","53","Jdrosana","São Paulo","SP","316","veterinario","54252421","958442233","eads@gmail.com");
+select * from tbl_especialistas;
+
+
+### ===>>> UPDATE ESPECIALISTAS
+ DELIMITER $$
+CREATE PROCEDURE sp_update_especialistas(
+	id int(11),registro_espec varchar(45), nome_especialista varchar(45), telefone_especialista varchar(45),
+    celular_especialista varchar(45), email_especialista varchar(45))
+begin
+
+		if id <= (select max(id_especialista) from tbl_especialistas) and id > 0
+        and (select id_especialista from tbl_especialistas where id_especialista = id and especialista_deletado = 0) then  # VERIFICANDO SE O ID É VALIDO.(obs> se eu n faço isso > ele aceita qualquer numero)
+		
+			update tbl_especialistas set 
+			registro = registro_espec,
+			nome_especialista = nome_especialista,
+			telefone_especialista = telefone_especialista,
+			celular_especialista = celular_especialista,
+			email_especialista = email_especialista,
+			FK_id_profissao = (select max(id_profissao) from tbl_profissoes)
+			where id_especialista = id; # > and registro = registro_espec; # se eu fizer isso > eu nao vou permitir q mude o n° do REGISTRO > pois é como se fosse um ID >  E tbm é bom n mudar pq se eu quiser verificar dps..
+        
+			SELECT * FROM tbl_especialistas where id_especialista = id;
+        end if;
+ end $$
+ DELIMITER ;
+ 
+ # TESTANDO
+ select * from tbl_especialistas;
+ call sp_update_especialistas(2,"326","renan","5821-8833","95432-4124","renan@gmail.com");  # se passar o ID ERRADO NO FRONT > ELE N TRAZ NADA > AI EU TENHO Q MANDAR O ERRO FALANDO Q O ID TA ERRADO. OU O ESPECIALISTA JA FOI DELETADO
+ select * from tbl_especialistas;
+ 
+
+#===>> CRIANDO PROCEDURE DE EXCLUSAO PRA TBL_ESPECIALISTAS 
+ 
+drop procedure sp_exclusao_especialistas;
+DELIMITER $$
+CREATE PROCEDURE sp_exclusao_especialistas(id int(11))
+
+begin
+
+		if id <= (select max(id_especialista) from tbl_especialistas) and id > 0
+        and (select id_especialista from tbl_especialistas where id_especialista = id and especialista_deletado = 0) then  ## ISSO AQUI FOI MUITO BOM..
+		
+			update tbl_especialistas set 
+			especialista_deletado = 1
+			where id_especialista = id;
+        
+			select * from tbl_especialistas where id_especialista = id ;
+        end if;
+	 end $$
+ DELIMITER ;
+ 
+ # TESTANDO 
+ select * from tbl_especialistas;
+ CALL sp_exclusao_especialistas(2);
+select * from tbl_especialistas;
+
+
+#=============> CRIANDO PROCEDURE GET PARA ENCONTRAR ESPECIALISTA POR (ID) 
+drop procedure sp_encontra_especialista;
+DELIMITER $$ 
+
+CREATE PROCEDURE sp_encontra_especialista(id int(11))
+
+begin
+		
+        if id <= (select max(id_especialista) from tbl_especialistas) and id > 0 then
+			select * from tbl_especialistas where id_especialista = id;
+        end if;
+ end $$
+ DELIMITER ;
+
+# testando 
+select * from tbl_especialistas;
+call sp_encontra_especialista(10);
+select * from tbl_especialistas;
+
+
+##===== > CRIANDO 2 PROCEDURE (GET) ENCONTRAR (TODOS ESPECIALISTA ) QUANDO O ID = 0
+
+DELIMITER $$ 
+
+CREATE PROCEDURE sp_todos_especialista(id int(11))
+
+begin
+		if id = 0 then
+			select * from tbl_especialistas;
+        end if;
+        
+ end $$
+ DELIMITER ;
+
+# testando 
+select * from tbl_especialistas;
+call sp_todos_especialista(0);
+select * from tbl_especialistas;
+
+
+# DICA TOP > FICAR LIGADO NAS TRIGGERS QUANDO ACONTECER ALGUM BO > TALVES A TRIGGER ESTEJA INTERFERINDO EM ALGO..  
+ 
+ 
+select * from tbl_profissoes;
+
+# TENTANDO CRIAR PROCEDURA PRA TBL_PROFISSOES > INSERÇÃO 
+
+drop procedure sp_registra_profissoes;
+
+###======>>> INSERT DA TBL_PROFISSOES 
+DELIMITER $$
+create procedure sp_registra_profissoes(
+	nome varchar(45))
+begin	
+
+		insert into tbl_profissoes (nome_profissao)
+			values(nome);
+end$$
+DELIMITER ;
+
+# TESTANDO
+select * from tbl_profissoes;
+
+call sp_registra_profissoes("medico");
+
+#### ========= >> UPDATE DA TBL PROFISSOES 
+
+drop procedure sp_update_profissoes;
+
+DELIMITER $$
+create procedure sp_update_profissoes(
+	id int(11), nome varchar(45) )
+begin
+		if id <= (select max(id_profissao) from tbl_profissoes) and id > 0
+			and (select id_profissao from tbl_profissoes where id_profissao = id and profissao_deletada = 0)
+        then 
+            update tbl_profissoes set 
+			nome_profissao = nome
+			where id_profissao = id;
+			select * from tbl_profissoes where id_profissao = id;
+		end if;
+end$$
+DELIMITER ;
+	 
+# TESTANDO
+
+select * from tbl_profissoes; 
+call sp_update_profissoes(2,"professor");
+select * from tbl_profissoes;
+
+##======>> EXCLUSÃO DE PROFISSÕES 
+drop procedure sp_exclusao_profissoes;
+DELIMITER $$
+create procedure sp_exclusao_profissoes(
+	id int(11))
+begin
+			if id <= (select max(id_profissao) from tbl_profissoes) and id > 0 
+				and (select id_profissao from tbl_profissoes where id_profissao = id and profissao_deletada = 0)
+            then  
+                update tbl_profissoes set 
+				profissao_deletada = 1
+				where id_profissao = id ;
+				select * from tbl_profissoes where id_profissao = id;
+			end if;
+			
+end$$
+DELIMITER ;
+
+#testando 
+select * from tbl_profissoes;
+call sp_exclusao_profissoes(9);
+
+### ===> CRIANDO PROCEDURE (GET) PRA MOSTRAR A PROFISSÃO Q EU QUERO PELO (ID) 
+drop procedure sp_encontra_profissao;
+DELIMITER $$ 
+
+CREATE PROCEDURE sp_encontra_profissao(id int(11))
+
+begin
+		if id <= (select max(id_profissao) from tbl_profissoes) and id > 0 then
+			select * from tbl_profissoes where id_profissao = id;
+        end if;
+ end $$
+ DELIMITER ;
+
+# testando 
+select * from tbl_profissoes;
+call sp_encontra_profissao(2);
+
+select * from tbl_profissoes;
+
+## === > CRIANDO PROCEDURE GET 2 > (MOSTRAR TODAS AS PROFISSOES) COM ID = 0 > 
+DELIMITER $$ 
+
+CREATE PROCEDURE sp_todas_profissoes(id int(11))
+
+begin
+		if id = 0 then 
+			select * from tbl_profissoes;
+        
+        end if;
+ end $$
+ DELIMITER ;
+ 
+ # testando 
+ use etec;
+ SELECT * FROM tbl_clientes;
+ SELECT * FROM tbl_especialistas;
+ SELECT * from tbl_profissoes;
+ SELECT * FROM tbl_usuarios;
+ 
+ call sp_todas_profissoes(0);

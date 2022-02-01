@@ -1,0 +1,185 @@
+## 10 ° video == > https://www.youtube.com/watch?v=yPex2hCocL4&list=PLOqx8yEV2-l0aNKvWbQn-VL_YDuRtW7E9&index=10
+
+select* from tbl_especialistas;
+# CRIANDO INDEX PARA AJUDAR NAS CONSULTAS > Os índices são empregados em uma consulta para ajudar a encontrar registros com um valor específico em uma coluna de forma rápida – ou seja, para aumentar o desempenho na execução de consultas. Sem índices, o MySQL faz uma busca iniciando no primeiro registro e varrendo toda a tabela até encontrar os registros que importam.
+# CRIANDO INDEX JUNTO COM A TABELA > 
+#CREATE [UNIQUE] INDEX nome_índice ON nome_tabela (  coluna1 [ASC | DESC],  [coluna2 [ASC | DESC]]...);
+#UNIQUE significa que o índice não permitirá valores duplicados na coluna.
+#ASC e DESC se referem à ordem de indexação, se ascendente (ASC) ou descendente (DESC). O padrão é ASC, se nada for informado.
+
+use etec2;
+# VOU CRIAR UM INDEX PRO CPF > PRA FICAR MAIS FACIL A PESQUISA..> E TBM PENSANDO EM PERFOMACE > TEMOS Q CRIAR UM INDICE > NO CAMPO AONDE MAIS VAMOS PESQUISAR >NO CASO POR > CPF 
+# Para adicionar um índice a uma tabela já existente usamos a declaração CREATE INDEX: >  CREATE INDEX nome_índice ON tabela(colunas);
+select * from tbl_enderecos;
+select * from tbl_clientes; 
+
+SELECT * FROM tbl_clientes WHERE cpf = "6325420425";
+
+
+SHOW INDEX FROM tbl_clientes;	# para mostrar os index q possui.. 
+
+# DROP INDEX nome_índice ON tabela;   PARA EXCLUIR UM INDEX 
+
+use etec2;
+select * from tbl_clientes; 
+
+SELECT COUNT(nome_cliente) from tbl_clientes;
+
+EXPLAIN SELECT * FROM tbl_clientes WHERE nome_cliente = "joao";  # se eu fizer uma busca dessa vai percorrer todas as linhas até achar o nome rodrigo ( e isso consome memoria em bancos grandes)
+
+EXPLAIN SELECT * FROM tbl_clientes WHERE cpf = "123654"; # aqui vai direto em um linha só (isso é perfomance pro banco)
+
+EXPLAIN SELECT * FROM tbl_clientes WHERE id_cliente = 123662; # aqui tbm vai percorrer uma linha só pq é chave primary) 
+
+## resumindo EM BANCOS GRANDES ONDE A CONSULTA É SEMPRE COM UMA COISA SÓ TIPO ==> CPF , RG E ETC.. é sempre bom alem de ter uma chave primaria TBM TER UMA (UNIQUE KEY) UM INDEX UNICO PRA ESSA TABELA 
+# PARA FACILITAR A PESQUISA.. 
+
+# OBS > EM BANCOS PEQUENOS N PRECISA CRIAR O INDEX > MAS QUANDO FOR GRANDE > É BOM CRIAR PRA AJUDAR NAS PESQUISAS.. > PERFOMANCE
+# OBS 2 > CHAVES PRIMARIAS GERALMENTE SAO INDICES TBM > entao n precisa criar indices pra chaves primarIAS 
+# obs 3 > COMANDO PRA EXCLUIR UM INDEX SEM EXCLUIR A TABELA > DROP INDEX nome_índice ON tabela; 	
+
+# AGORA VOU CRIAR INDEX PARA FACILITAR A PESQUISA DESSAS DUAS TABELAS E LA EMBAIXO VOU MOSTRAR A DIFERENÇA COM O EXPLAIN APOS A CRIAÇÃO DOS INDEXS
+use etec2;
+CREATE INDEX cpf_todos ON tbl_clientes(cpf);	# > lembrando q esse ON > é onde faz a ligação com a chave estrangeira 
+
+CREATE UNIQUE INDEX cpf_unico ON tbl_clientes(cpf); # aqui vai buscar apenas os CPFS UNICOS
+
+CREATE INDEX email_cliente ON tbl_clientes(email_cliente);
+
+CREATE UNIQUE INDEX cep_unico ON tbl_enderecos(cep);
+
+
+SHOW INDEX FROM tbl_clientes;	# para mostrar os index q possui.. 
+
+SHOW INDEX FROM tbl_enderecos; 
+
+DROP INDEX cpf_todos ON tbl_clientes;
+
+
+## ADICIONANDO VALORES TESTE PARA A TABELA CLIENTES (lembrando que isso esta sendo feito pelo insomnia) mas vou fazer por aqui 
+
+use etec2;
+
+# ANTES DE PREENCHER A TABELA CLIENTES==> TEMOS Q PREENCHER A TABELA DE ENDEREÇOS E AI ENTAO , FAZER LIGACAO COM A CHAVE ESTRANGEIRA DE CLIENTES 
+
+## NA VERDADE O CERTO É CRIAR UMA (PROCEDURE) Q FAÇA O INSERT DAS DUAS TABELAS AO MESMO TEMPO.. E AI JOGA PRO NODE.. MAS POR ENQUANTO VOU DEIXAR SEPARADO MESMO 
+use etec2;
+## PREENCHENDO TBL_ENDERECOS
+
+INSERT INTO tbl_enderecos(cep,rua,numero,bairro,cidade,estado)
+	VALUES ("06855320","Rua dos moecanos",300,"Jardins","São Paulo","SP");
+    
+INSERT INTO tbl_enderecos(cep,rua,numero,bairro,cidade,estado)
+	VALUES ("06855320","Rua dos moecanos",300,"Jardins","São Paulo","SP"); ## NÃO VAI DEIXAR EU CRIAR PQ TEM O MESMO CEP DO DE CIMA.. (PQ EU CRIEI COMO CHAVE UNIQUE CEP)
+    
+INSERT INTO tbl_enderecos(cep,rua,numero,bairro,cidade,estado)
+	VALUES ("05645315","Rua das auroras",300,"Butantã","São Paulo","SP");
+    
+### PREENCHENDO TBL_CLIENTES
+
+INSERT INTO tbl_clientes(cpf,nome_cliente,telefone_cliente,celular_cliente,email_cliente,tipo_sanguineo)
+VALUES("6425420423","renan","11 4102-8922","11 999-7577","renan@gmail.com","O-");
+
+
+INSERT INTO tbl_clientes(cpf,nome_cliente,telefone_cliente,celular_cliente,email_cliente,tipo_sanguineo,FK_id_endereco)
+VALUES("6325420425","rodrigo","11 3122-8423","11 989-4327","renato@gmail.com","O-",1);
+
+use etec2;
+INSERT INTO tbl_clientes(cpf,nome_cliente,telefone_cliente,celular_cliente,email_cliente,tipo_sanguineo,FK_id_endereco)
+VALUES("6325420425","rafael","11 5432-8423","11 942-3953","rafael@gmail.com","O-",3);
+
+
+## AGORA Q JA FOI PREENCHIDO VALORES NAS TABELAS ==> VOU MOSTRAR A UTILIZADO DE CRIAR UM INDEX.. MOSTRANDO O COMANDO (EXPLAIN) PARA VERIFICAR A RAPIDEZ DAS LINHAS DE BUSCA 
+select * from tbl_enderecos;
+select * from tbl_clientes; 
+
+SELECT * FROM tbl_clientes WHERE cpf = "6325420425";
+
+EXPLAIN SELECT * FROM tbl_clientes WHERE nome_cliente = "renato";  # se eu fizer uma busca dessa vai percorrer todas as linhas até achar o nome rodrigo ( e isso consome memoria em bancos grandes)
+
+EXPLAIN SELECT * FROM tbl_clientes WHERE cpf = "6325420425"; # aqui vai direto em um linha só (isso é perfomance pro banco)
+
+EXPLAIN SELECT * FROM tbl_clientes WHERE id_cliente = 123662; # aqui tbm vai percorrer uma linha só pq é chave primary) 
+
+EXPLAIN SELECT * FROM tbl_enderecos WHERE cep = "6855320";
+
+EXPLAIN SELECT * FROM tbl_clientes WHERE email_cliente = "rafael@gmail.com";
+
+ # aqui vai buscar somente o cpf unico = pq eu criei uma UNIQUE INDEX
+## resumindo EM BANCOS GRANDES ONDE A CONSULTA É SEMPRE COM UMA COISA SÓ TIPO ==> CPF , RG E ETC.. é sempre bom alem de ter uma chave primaria TBM TER UMA (UNIQUE KEY) UM INDEX UNICO PRA ESSA TABELA 
+# PARA FACILITAR A PESQUISA.. 
+
+# OBS > EM BANCOS PEQUENOS N PRECISA CRIAR O INDEX > MAS QUANDO FOR GRANDE > É BOM CRIAR PRA AJUDAR NAS PESQUISAS.. > PERFOMANCE
+# OBS 2 > CHAVES PRIMARIAS GERALMENTE SAO INDICES TBM > entao n precisa criar indices pra chaves primarIAS 
+# obs 3 > COMANDO PRA EXCLUIR UM INDEX SEM EXCLUIR A TABELA > DROP INDEX nome_índice ON tabela; 	
+
+
+# 4° TABELA
+
+create table tbl_profissoes (
+	id_profissao int(11) primary key auto_increment,
+    nome_profissao varchar(45) not null,
+    profissao_deletada boolean default false  # > obs esqueci de colocar not null > refazer dps 
+    );
+
+# 5° tabela 
+create table tbl_especialistas (
+	id_especialista int(11) primary key auto_increment,
+    registro varchar (45) not null,
+    nome_especialista varchar (45) not null,
+    telefone_especialista varchar (45) ,
+    celular_especialista varchar (45),
+    email_especialista varchar (45),
+    FK_id_enderecos int(11),	# obs aqui eu deixei diferente> enderecos > pq na hora de criar vai dar divergencia > mas esta relacionada a mesma coisa.. 
+    FK_id_profissao int(11),
+    especialista_deletado boolean default false,
+    
+    constraint FK_id_enderecos foreign key(FK_id_enderecos) references tbl_enderecos(id_endereco), # OBS > COMO JA TINHA UMA CONSTRAINT COM > FK_ID_ENDERECO > ENTAO EU TIVE Q MUDAR > PRA N DAR CONFLITO > POREM ESTA USANDO O MESMO OBJETO 
+    constraint FK_id_profissao foreign key(FK_id_profissao) references tbl_profissoes(id_profissao)
+    );
+ 
+ # AQUI TBM É NECESSÁRIO CRIAR 2 INDEX PRA ESPECIALISTA > PRA AJUDAR NAS PESQUISAS > LEMBRANDO Q QUANDO CRIA INDEX > É BOM CRIAR SOBRE COISAS Q SAO UNICAS E Q N SE REPETE
+ CREATE INDEX registro_especialista ON tbl_especialistas(registro);
+ CREATE INDEX email_especialista ON tbl_especialistas(email_especialista);
+
+ 
+ # 6° tabela 
+ create table tbl_prontuarios (
+	id_prontuario int(11) primary key auto_increment,
+    data_prontuario date not null, 
+    FK_id_cliente int (11), # AQUI TBM DEVERIA SER NOT NULL 
+    
+    constraint FK_id_cliente foreign key(FK_id_cliente) references tbl_clientes(id_cliente)
+    );
+    
+    # 7° tabela 
+
+desc tbl_atendimentos; # > para conferir se deu certo.. > mostra todos os tipos e coisas internas da tabela
+select * from tbl_atendimentos;    
+
+
+    create table tbl_atendimentos (
+		id_atendimento int(11) primary key auto_increment,
+        data_agendada datetime not null,	# poderia ter > DEFAULT now
+        data_atendimento datetime,
+        valor_atendimento decimal(6,2) not null,
+        status_atendimento ENUM ('Agendado','Realizado','Cancelado') default 'Agendado' not null,
+        FK_id_prontuario int(11),
+        FK_id_especialista int(11),
+        
+        constraint FK_id_prontuario foreign key(FK_id_prontuario) references tbl_prontuarios(id_prontuario),
+        constraint FK_id_especialista foreign key(FK_id_especialista) references tbl_especialistas(id_especialista)
+    );
+    
+    # 8° tabela > ultima 
+    
+    
+    create table tbl_historicos_prontuarios (	# o certo é fazer > create table if not exist 
+		id_historico int (11) primary key auto_increment,
+        data_atendimento datetime not null,
+        descricao text not null,		# obs esse tipo TExt é como se fosse varchar > a diferença é q ele consome mais memoria > e da pra manipular strings com ele.. como salvar,ler.. etc.. mas logo menos ele entra em desuso
+        FK_id_atendimento int(11),
+        
+        constraint FK_id_atendimento foreign key(FK_id_atendimento) references tbl_atendimentos(id_atendimento)
+        );
+        

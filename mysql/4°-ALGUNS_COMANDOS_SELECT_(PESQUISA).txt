@@ -1,0 +1,41 @@
+# BUSCANDO O QUE EU QUERO NO BANCO.. 
+
+# 4° VIDEO ==> https://www.youtube.com/watch?v=067qj-qqv_0&list=PLOqx8yEV2-l0aNKvWbQn-VL_YDuRtW7E9&index=4
+
+use etec2;
+SELECT * FROM tbl_diretor ; # ESSE COMAANDO MOSTRA A TABELA COMPLETA
+
+# QUERO SELECIONAR APENAS O NOME E NACIONALIDADE : 
+
+SELECT nome_diretor,nacionalidade FROM tbl_diretor;  # > selecionando colunas especificas 
+
+# AGORA QUERO PEGAR UM CONTEUDO ESPECIFICO DENTRO DAS COLUNAS 
+
+select nome_diretor,nacionalidade FROM tbl_diretor WHERE nacionalidade="Brasil"; # > todo filtro > eu USO O WHERE 
+
+SELECT * from tbl_ator;
+# TRABALHANDO COM DATAS # > LEMBRANDO Q PODE USAR OPERADORES >>    > / < / >= / <= / =  / AND / OR / <> = DIFERENTE  
+SELECT * FROM tbl_ator WHERE dt_nascimento < "1970/01/01";  # SOMENTE Q FOR MENOR DO QUE ESSA DATA VAI TRAZER > data > yyyy/mm/dd
+
+# 1) ACHA TODOS OS ATORES Q NASCERAM MASCULINOS ENTRE 1980 E 1990
+
+SELECT * FROM tbl_ator WHERE dt_nascimento > "1979/12/31" AND dt_nascimento < "1991/01/01" AND sexo= "m";
+
+# COMANDO TOP >   BETWEEN = ENTRE >> VOU REFAZER O A QUESTAO DE CIMA USANDO O BETWEEN 
+
+SELECT * FROM tbl_ator WHERE dt_nascimento BETWEEN "1980/01/01" AND "1990/12/31" AND SEXO = "M";
+# obs>  SÓ USA ASPAS NAS STRINGS OU NAS DATAS 
+
+# SELECIONAR OS FILMES ENTRE 2000 E 2010 E Q CONTENHA DURAÇÃO ENTRE > 60 E 100 MIN > OBS SE N TRAZER NADA É PQ N EXISTE..  fe#
+
+# 2 formas de fazer
+
+SELECT * FROM tbl_filme;
+
+select * FROM tbl_filme WHERE ano_lancamento BETWEEN 2000 AND 2010 AND duracao BETWEEN "60" AND "100";
+ 
+select * FROM tbl_filme WHERE ano_lancamento BETWEEN 2000 AND 2010 AND duracao>= "60" and duracao<= "100"; 
+
+
+select * from tbl_filme;
+ # OBS TOP > OS DADOS DO TIPO INT N USA ASPAAS..

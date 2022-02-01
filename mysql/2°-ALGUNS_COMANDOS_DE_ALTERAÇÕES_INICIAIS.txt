@@ -1,0 +1,22 @@
+# 2° VIDEO ==> https://www.youtube.com/watch?v=yf-H-OmtzrY&list=PLOqx8yEV2-l0aNKvWbQn-VL_YDuRtW7E9&index=2
+
+USE etec2;
+# 1) Acrescentar na tabela DIRETOR o campo sexo sendo varchar(1) e não nulo.
+ALTER TABLE tbl_diretor ADD sexo varchar(1) not null;
+DESC tbl_diretor;  -- PARA CONFIRMAR SE FOI ALTERADO 
+SELECT * FROM tbl_diretor;
+
+# 2) Na tabela DIRETOR alterar o tamanho do campo NACIONALIDADE para varchar(45).
+ALTER TABLE tbl_diretor MODIFY nacionalidade varchar(45) not null;
+
+# 3) Na tabela FILME excluir a coluna NOME_FILME_EN e alterar NOME_FILME_PT para apenas NOME_FILME.
+SELECT * FROM tbl_filme;
+ALTER TABLE tbl_filme DROP nome_filme_en;
+
+ALTER TABLE tbl_filme CHANGE nome_filme_pt  nome_filme varchar(45) not null;
+
+# 4) Renomear a tabela TBL_FILME_HAS_TBL_ATOR para FILME_E_ATOR.
+
+ALTER TABLE tbl_filme_has_tbl_ator RENAME filme_e_ator;
+
+

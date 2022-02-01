@@ -1,0 +1,25 @@
+## 7° VIDEO ==> https://www.youtube.com/watch?v=CPNkJ2vVqjA&list=PLOqx8yEV2-l0aNKvWbQn-VL_YDuRtW7E9&index=7
+
+# TRABALHANDO COM FUNÇÕES DE DATA  >> "CURDATE()"=DATA DO SERVIDOR atual / "NOW()" = DATA E HORA ATUAL DO SERVIDOR / 
+# OUTRAS FUNCOES > DAY() / MONTH() / YEAR() / HOUR() / MINUTE () / SECOND () / DAYOFWEEK / DAYOFYEAR / WEEKOFYEAR 
+SELECT CURDATE(); # data atual
+SELECT HOUR(now()); # hora atual  // 
+SELECT MINUTE(NOW()); #MINUTO ATUAL.. ETC.. 
+
+SELECT * FROM tbl_ator WHERE MONTH(dt_nascimento) = 06; # vai trazer todos os atores que nasceram no mês 06.. 
+
+SELECT NOW(); # DATA / HORA E MIN ATUAL 
+
+# TBM TEMOS A PROPRIEDADE > "INTERVAL" > PERMITE ADICIONAR UM INVERVALO NAS FUNCOES DE DATA > TIPO UM BETWEEN 
+SELECT NOW() + INTERVAL 3 day; # vai PEGAR A DATA E HORA ATUAL + 3 DIAS.. 
+
+# SELECIONE TODOS OS ATORES Q NASCERAM  NOS ULTIMOS 35 ANOS 
+SELECT * FROM tbl_ator WHERE dt_nascimento > NOW() - INTERVAL 35 YEAR; #1995-07-15 ()
+
+# TRABALHANDO COM SUBQUERY > É QUANDO UM SELECT FICA DENTRO DO OUTRO 
+#SELECT ( select now() + INTERVAL 2 day ) + INTERVAL 1 month; 
+
+SELECT nome_filme,duracao from tbl_filme WHERE duracao > (select MAX(duracao) from tbl_filme) ; # ISSO É BOM PQ AS VEZS USANDO SÓ O MIN OU MAX E TRAZENDO MAIS UM RESULTADO > ELE SÓ VAI MOSTRAR O 1° Q EL ACHAR .. MAS N SIGNIFICA SER O CORRETO.. E COM A SUBQUERY O FILTRO FICA MELHOR
+
+# selecione todos os filmes que a duração seja maior que a média das durações 
+SELECT * FROM tbl_filme WHERE duracao > (SELECT AVG(duracao) from tbl_filme) ;

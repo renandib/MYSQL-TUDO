@@ -1,0 +1,211 @@
+
+# 13° VIDEO ==> https://www.youtube.com/watch?v=guwuGhtwvgE&list=PLOqx8yEV2-l0aNKvWbQn-VL_YDuRtW7E9&index=13
+
+# 1) OS NOMES TENQ TER AQUELAS REGRAS > DE mM ... ENFIM  2) TENQ TER O NOME DA TABELA / 3) AFTER E BEFORE > QUER Q EXECUTA ANTS OU DPS / 4) USA INSERT/UPDATE E DELETE
+# OBS > NAO PODE CRIAR 2 AFTER INSERT / UPDATE/DELETE > NA MESMA TABELA > PODE CRIAR EM TABELAS DIFERENTES > NA MESMA NAO 
+# OBS 2 > É POSSIVEL PEGAR OS VALORES "OLD" = ANTIGOS ANTES DO EVENTO E TBM OS > "NEW" = VALOR NOVO (ALTERADO) 
+# OBS 3 > TBM PODE CRIAR REGISTROS ( LOGS) ANTES DE FAZER AS ALTERACOES USANDO "OLD"
+# Montagem 
+ #DELIMITER [ DEFINE UM DELIMITADOR ] 
+# CREATE TRIGGER <nome>
+ #<AFTER/BEFORE> 
+ #<INSERT/UPDATE/DELETE> ON <TABELA> 
+ #FOR EACH ROW BEGIN <codigo sql> END [DELIMITADOR]
+ 
+ # PROFESSOR VAI CRIAR UM BANCO A PARTE PRA FALAR SOBRE TRIGGER > MAS É SÓ COMO EX > MAS TBM VOU FAZER PRA AJUDAR > POREM VOU USAR SOMENTE NO MEU BANCO DPS
+ use etec;
+ #
+ 
+ ### CRIANDO BANCO PARA FALAR DE TRIGGERS
+ 
+ 
+ CREATE DATABASE db_exemplo;
+
+DROP database db_exemplo; 
+
+# DROP TRIGGER NOME_TRIGGER; > PARA APAGAR TRIGGER 
+use db_exemplo;
+
+
+# CRIANDO A TBL_CLIENTES
+CREATE TABLE tbl_cliente(
+    id_cliente int primary key auto_increment,
+    nome varchar(45) not null
+);
+
+# 1° ADD CLIENTES
+INSERT INTO tbl_cliente(nome) VALUES('Aderbrando'),('rodrigo'),('jessica'),('ricardo'),('cesar'); 
+SELECT * from tbl_cliente; 
+
+# registro de livros
+CREATE TABLE tbl_livro(
+    id_livro int primary key auto_increment,
+    nome_livro varchar(45) not null,
+    valor_livro decimal(5,2) not null
+);
+ 
+ # 2° ADD LIVROS , VALORES 
+ INSERT INTO tbl_livro(nome_livro, valor_livro) VALUES('Matrix','45.50'),('Pangeia','55.50'),('Troia','35.50');
+ SELECT * FROM tbl_livro;
+ 
+ # COMPRADORES DE LIVROS 
+ CREATE TABLE tbl_compras (
+	id_compra int primary key auto_increment,
+    data_compra datetime default now(),
+    FK_id_livro_compra int not null,
+    FK_id_cliente_compra int not null,
+    
+    constraint FK_id_livro_compra foreign key(FK_id_livro_compra) references tbl_livro(id_livro),
+    constraint FK_id_cliente_compra foreign key(FK_id_cliente_compra) references tbl_cliente(id_cliente)
+ 
+ );
+ 
+ # 3° ADD COMPRADORES DE LIVROS 
+ INSERT INTO tbl_compras (data_compra , FK_id_livro_compra , FK_id_cliente_compra) VALUES (DEFAULT , 1,1) , (DEFAULT , 2 , 2) ; 
+ SELECT * FROM tbl_compras;
+ 
+ # registro de alugueis de livros ( GRATIS ) => QUEM PEGA ESSES LIVROS EMPRESTADOS
+CREATE TABLE tbl_emprestimo(
+    id_emprestimo int primary key auto_increment,
+    dt_retirada datetime default now(),
+    dt_entrega datetime default (now() + interval 3 day) ,
+    FK_id_cliente int not null,
+    FK_id_livro int not null,
+    
+    constraint FK_id_cliente foreign key(FK_id_cliente) references tbl_cliente(id_cliente),
+    constraint FK_id_livro foreign key (FK_id_livro) references tbl_livro(id_livro)
+);
+
+SELECT * FROM tbl_emprestimo;
+
+# TABELA DE PENDENCIAS 
+
+CREATE TABLE tbl_pendencias(
+	id_pendencia int primary key auto_increment,
+    dt_inicio datetime default now(),
+    dt_fim date , 
+    devendo varchar(25),
+    atraso_de_4_dias decimal (3,2),
+    FK_id_clientes int not null,
+    FK_id_livros int not null,
+    
+	constraint FK_id_clientes foreign key(FK_id_clientes) references tbl_cliente(id_cliente),
+    constraint FK_id_livros foreign key (FK_id_livros) references tbl_livro(id_livro)
+    
+);
+ 
+ SELECT * FROM tbl_pendencias;
+ 
+ # guarda historico antigo dos valores antigos dos livros
+CREATE TABLE tbl_historico_livro(
+    id_historico int primary key auto_increment,
+    FK_id_livro int not null,
+    valor_antigo decimal(5,2) not null,
+    dt_alteracao datetime default now()
+);
+
+SELECT * FROM tbl_historico_livro;
+
+### TRIGGERS ==> GATILHOS PROGRAMADOS 
+
+## OBS É SEMPRE BOM CRIAR UMA TRIGGER PENSANDO ANTES DOS INSERT / UPDATES E DELETES.. 
+ 
+# lembrando q só vai executar a TRIGGER >QUANDO O GATILHO FOR CHAMADO > NO CASO O INSERT..
+SHOW triggers;
+
+## CRIANDO UMA TRIGGER + procedure
+/*
+DELIMITER $
+    CREATE TRIGGER trg_salvahistorico before update on tbl_livro
+    FOR EACH ROW
+    
+    # EXECUTE PROCEDURE NOME_TAL ();
+*/
+
+
+# ISSO AQUI VAI SALVAR OS VALORES ANTIGOS na tabela tbl_historico.. PRA QUANDO EU QUISER CONSULTAR
+# vou criar uma funcao = trigger > antes de acontecer um UPDATE NA TBL_LIVRO > VAI SALVAR OS VALORES Q JA TINHA (OLD.VALOR Q JA TEM) E COLOCAR NA TABELA > "TBL_HISTORICO_LIVRO" 
+
+DELIMITER $
+    CREATE TRIGGER trg_salvahistorico before update on tbl_livro
+    FOR EACH ROW
+        BEGIN
+            INSERT INTO tbl_historico_livro(FK_id_livro, valor_antigo, dt_alteracao)
+            VALUES(OLD.id_livro, OLD.valor_livro, default);  ## inserindo valores antigos na tblde historicos
+        END$
+
+delimiter ;
+
+SELECT * FROM tbl_historico_livro; # SÓ VERIFICAR se nao tem nada.. 
+
+## TESTANDO A TRIGGER
+# VALOR ANTIGO DOS LIVROS 
+SELECT * FROM tbl_livro;
+
+# ADD ==> VALOR DO LIVRO (NOVO) E VE SE GUARDA OS VALORES ANTIGOS
+  
+UPDATE tbl_livro SET valor_livro = '35.99' WHERE id_livro = 1; # esse vai se tonar o valor NOVO
+# AGORA CONFERINDO PRA VER SE A TRIGGER FUNCIONOU E GUARDOU O VALOR ANTIGO DO LIVRO
+SELECT * FROM tbl_historico_livro; # o antigo valor ele guardou aqui > pela trigger q eu fiz
+
+# TESTANDO ALTERAÇÕES PRA VER SE MINHAS TRIGGERS FUNCIONAM 
+# 1° VOU ALTERAR O NOME DO LIVRO E VE O QUE ACONTECE COM A TRIGGER Q EU FIZ
+
+UPDATE tbl_livro SET nome_livro = 'coisas 2 ' WHERE id_livro = 1;
+
+
+UPDATE tbl_livro SET valor_livro = '44.44' WHERE id_livro = 1;
+
+# ASSIM Q TIVER UM NOVO INSERT NA TBL_CLIENTE > VAI GERAR UM NOVO ID_CLIENTE E POR ESSA LOGICA EU VOU FAZER OUTRO COMANDO PRA OUTRA TABELA 
+# OBS > AQUI DENTRO DO DELIMITER > N ACEITA FAZER INSERT OU OUTRO COMANDO > SÓ DPS Q ACABAR O DELIMITER
+
+# AQUI EU TO CRIANDO UM INDICA LIVRO > TODA VEZ Q TIVER UM INSERT NOVO NA TBL_CLIENTE > VAI GUARDAR O NOVO ID DO CLIENTE > NA TABELA > "EMPRESTIMO"
+ /*
+ CREATE TRIGGER trg_alugel after insert on tbl_emprestimo 
+  
+    FOR EACH ROW
+        BEGIN
+            insert into tbl_pendencias(dt_inicio, dt_fim, FK_id_cliente)
+            VALUES(default, NEW.id_cliente);
+        END$
+DELIMITER ; 
+*/
+SELECT * FROM tbl_emprestimo;
+
+# drop trigger trg_alugel;
+
+show triggers;
+
+# CRIANDO UMA TRIGGER PRA MOSTRAR AS PENDENCIAS DOS LIVROS Q NAO FORAM DEVOLVIDOS NO TEMPO PERMITIDO DE 3 DIAS
+
+# quando for preencher a tbl_emprestimo coloca a data normal de 3 dias.. porem se o cliente devolver dps, quando for atualizar vai cair na trigger
+DELIMITER $  
+CREATE TRIGGER trg_alugel after update on tbl_emprestimo 
+  
+    FOR EACH ROW
+        BEGIN
+        IF NEW.dt_entrega > OLD.dt_entrega THEN 
+			insert into tbl_pendencias(dt_inicio, dt_fim, devendo,atraso_de_4_dias, FK_id_clientes , FK_id_livros)
+			VALUES(default, NEW.dt_entrega,"sim" ,"9.99",1,2);
+		END IF;
+        END$
+DELIMITER ; 
+
+
+# DEU CERTOO SÓ FALTA ARRUMAR ALGUMAS COISAS COMO O --> O ATRASO , COMPARAR COM A DATA LIMITE DE 3 DIAS.. FAZER ISSO DPS
+select dt_entrega from tbl_emprestimo;
+# 3° TESTANDO A TRIGGER ==>  ADD QUEM PEGA OS LIVROS EMPRESTADOS 
+
+INSERT INTO tbl_emprestimo(dt_retirada, dt_entrega , FK_id_cliente , FK_id_livro)
+VALUES(default,default,4,1),(default, default,3,2); 
+SELECT * FROM tbl_emprestimo;
+
+## TESTANDO A TRIGGER => COLOCANDO DATA ACIMA DE 3 DIAS..
+UPDATE tbl_emprestimo SET dt_entrega = "2021-01-15" WHERE FK_id_livro = 1;
+
+
+## aqui nao vai funcionar porque é um INSERT -->  E A MINHA TRIGGER ESTA PROGRAMADA PARA UPDATE.
+INSERT INTO tbl_emprestimo(dt_retirada, dt_entrega, FK_id_cliente , FK_id_livro)
+VALUES(default, "2021-01-11" ,2,2);
+
+SELECT * FROM tbl_pendencias; # TESTANDO SE A TRIGGER FUNCIONOU 

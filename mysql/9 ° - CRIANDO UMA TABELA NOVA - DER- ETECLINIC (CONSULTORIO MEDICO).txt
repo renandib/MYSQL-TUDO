@@ -1,0 +1,53 @@
+## 9 ° VIDEO ==> https://www.youtube.com/watch?v=X9ZsIO15L88&list=PLOqx8yEV2-l0aNKvWbQn-VL_YDuRtW7E9&index=9
+# COLOCAR DIAGRAMA JUNTO - BANCO_2
+
+USE etec2;
+SELECT * FROM tbl_clientes;
+## 1° TRABALHO QUE O PROF PEDIU > CONSTRUIR TABELA CONFORME DIAGRAMA  ELE PASSOU > 27/07 > PARA ENTREGAR ATE 03/08 
+## > CRIAR UMA TABELA DE UM CONSULTORIO DENTISTA  
+#LEMBRANDO Q ELE PEDIU PRA MUDAR ALGUMAS COISAS > AONDE TEM Tymint >> BOOLEAN DEFAULT FALSE e tbm pediu para DEIXAR AONDE TEM ENUM > OS TIPOS ESPECIFICOS Q ELE QUER
+# lembrando q é bom começar pelas tabelas q n tem chave estrangeira > e tbm lembrando q o losango azul significa q TENQ SER NOT NULL.. 
+## 1° TABELA 
+
+
+
+create table tbl_usuarios (
+	id_login int(11) primary key auto_increment,
+    email varchar(45) not null,
+    senha varchar(64) not null,
+    usuario varchar(45) not null,
+    usuario_deletado boolean default false); # ISSO AQUI VAI GERAR UM VALOR (0) padrão por ser false 
+ 
+ # 2° TABELA 
+create table tbl_enderecos(
+	id_endereco int(11) primary key auto_increment,
+    cep int(10) not null,
+    rua varchar(45) not null,
+    numero varchar(10) not null,
+    bairro varchar(45) not null,
+    cidade varchar(45) not null,
+    estado varchar(2) not null );
+    
+# 3° TABELA
+
+
+SELECT * FROM tbl_historicos_prontuarios;
+
+
+desc tbl_clientes;
+
+create table tbl_clientes (
+	id_cliente int(11) primary key auto_increment,
+    cpf varchar (11) not null,
+    nome_cliente varchar (45) not null,
+    telefone_cliente varchar(45),
+    celular_cliente varchar(45),
+    email_cliente varchar(45),
+    tipo_sanguineo enum ('A+','A-','B+','B-','O+','O-','AB+','AB-') not null,
+    FK_id_endereco INT(11),
+    cliente_deletado boolean default false, # VAI GERA UM VALOR = (0) PADRAO por ser false obs > era pra ter colocado um NOT NULL AQUI DPS DO BOOLEAN 
+
+    constraint FK_id_endereco foreign key(FK_id_endereco) references tbl_enderecos(id_endereco)
+);
+
+DROP TABLE tbl_clientes;
